@@ -1,18 +1,17 @@
 package com.example.todoapi;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class HelloController {
 
-    private List<Task> tasks = new ArrayList<>();
-    private Long nextId = 1L;
+    @Autowired
+    private TaskRepository taskRepository;
 
     @GetMapping("/hello")
     public String hello(){
@@ -36,31 +35,24 @@ public class HelloController {
 
     @PostMapping("/tasks")
     public Task createTask(@RequestBody Task task) {
-        task.setId(nextId++);
-        tasks.add(task);
-        return task;
+        return taskRepository.save(task);
     }
 
     @GetMapping("/tasks")
     public List<Task> getAllTasks(){
-        return tasks;
+        return taskRepository.findAll();
     }
 
     @GetMapping("/tasks/{id}")
     public Task getTaskById(@PathVariable Long id){
 
-        for (Task task : tasks){
-            if (task.getId().equals(id)){
-                return task;
-            }
-        }
-        return null;
+        return taskRepository.findById(id).orElse(null);
     }
 
     @DeleteMapping("/tasks/{id}")
     public String deleteTask(@PathVariable Long id){
-        boolean removed = tasks.removeIf(task -> task.getId().equals(id));
-            if (removed){
+            if (taskRepository.existsById(id)){
+                taskRepository.existsById(id);
                 return "Task deleted";
             }
         return "Task not found";

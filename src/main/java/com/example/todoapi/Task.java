@@ -1,9 +1,21 @@
 package com.example.todoapi;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "tasks")
 public class Task {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String title;
     private String description;
-    private Long id;
+
+    public Task(){
+
+    }
 
     public Task(String title, String description, Long id) {
         this.title = title;
