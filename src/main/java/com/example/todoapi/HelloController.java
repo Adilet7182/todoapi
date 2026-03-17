@@ -1,9 +1,10 @@
 package com.example.todoapi;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -56,5 +57,14 @@ public class HelloController {
                 return "Task deleted";
             }
         return "Task not found";
+    }
+
+    @PutMapping("/tasks/{id}")
+    public Task updateTask(@PathVariable Long id, @RequestBody Task updatedTask){
+        if (taskRepository.existsById(id)){
+            updatedTask.setId(id); // установка id из url
+            return taskRepository.save(updatedTask);
+        }
+        return null;
     }
 }
