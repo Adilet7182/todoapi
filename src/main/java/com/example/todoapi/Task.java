@@ -2,6 +2,8 @@ package com.example.todoapi;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "tasks")
 public class Task {
@@ -12,6 +14,9 @@ public class Task {
 
     private String title;
     private String description;
+    private Long userId;
+    private LocalDateTime reminderTime;
+    private boolean completed = false;
 
     public Task(){
 
@@ -45,5 +50,29 @@ public class Task {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public LocalDateTime getReminderTime() {
+        return reminderTime;
+    }
+
+    public void setReminderTime(LocalDateTime reminderTime) {
+        this.reminderTime = reminderTime;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }
