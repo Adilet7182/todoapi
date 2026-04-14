@@ -26,19 +26,16 @@ public class TaskService {
         return taskRepository.findByUserId(userId);
     }
 
-//    public List<Task> markDone(Long taskId){
-//        Task task = taskRepository.findById(taskId);
-//        if (task.isCompleted()){
-//            return Task;
-//        }
-//
-//    }
+    public Task markDone(Long taskId){
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+        task.setCompleted(true);
+        return taskRepository.save(task);
+    }
 
-//    public Task deleteTask(Long taskId){
-//        Task task = new Task();
-//        task.setUserId(taskId);
-//        return taskRepository.delete(taskId);
-//    }
-
-
+    public void deleteTask(Long taskId){
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+        taskRepository.delete(task);
+    }
 }

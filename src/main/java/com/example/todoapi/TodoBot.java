@@ -1,5 +1,7 @@
 package com.example.todoapi;
 
+import com.example.todoapi.service.TaskService;
+import com.example.todoapi.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,13 +19,21 @@ public class TodoBot extends TelegramLongPollingBot {
     private String botUsername;
 
     @Override
+    public String getBotToken(){
+        return botToken;
+    }
+
+    @Override
     public String getBotUsername(){
         return botUsername;
     }
 
-    @Override
-    public String getBotToken(){
-        return botToken;
+    private final UserService userService;
+    private final TaskService taskService;
+
+    public TodoBot(UserService userService, TaskService taskService){
+        this.userService = userService;
+        this.taskService = taskService;
     }
 
     @Override
@@ -32,6 +42,9 @@ public class TodoBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()){
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
+            Long telegramId = update.getMessage().getFrom().getId();
+            String username = update.getMessage().getFrom().getUserName();
+            User user = userService.getOrCreateUser(telegramId, username);
 
             if (messageText.equals("/start")){
                 sendMessage(chatId, "\uD83D\uDC4B Привет! Я TodoList Helper!\n" +
@@ -42,6 +55,48 @@ public class TodoBot extends TelegramLongPollingBot {
                         "/done - Отметить задачу выполненной\n" +
                         "/delete - Удалить задачу");
             }
+
+            if (messageText.startsWith("/add")){
+                if (messageText.length() > 5) {
+                    String text = messageText.substring(5);
+                    taskService.createTask(user.getId(), text);
+                    sendMessage(chatId, "Задача Добавлена!");
+                } else {
+                    sendMessage(chatId, "А где сообственно текст?");
+                }
+            }
+
+            if (messageText.equals("/list")){
+                var tasks = taskService.getTasksByUser(user.getId());
+                StringBuilder sb = new StringBuilder();
+                if (tasks != null && tasks.isEmpty()){
+                    sendMessage(chatId, "Задач нет");
+                } else {
+                    for (Task task : tasks){
+                        sb.append(task.getTitle()).append("\n");
+                    }
+                    sendMessage(chatId, sb.toString());
+                }
+            }
+
+            if(messageText.startsWith("/done")){
+                if (messageText.length() > 6){
+                    String number = messageText.substring(6);
+                    Long newNumber = Long.parseLong(number);
+                    taskService.markDone(newNumber);
+                    sendMessage(chatId, "Задача выполнена!");
+                }
+            }
+
+            if (messageText.startsWith("/delete")){
+                if (messageText.length() >8){
+                    String number = messageText.substring(8);
+                    Long newNumber = Long.parseLong(number);
+                    taskService.deleteTask(newNumber);
+                    sendMessage(chatId, "Задача удалена!");
+                }
+            }
+
         }
     }
 
