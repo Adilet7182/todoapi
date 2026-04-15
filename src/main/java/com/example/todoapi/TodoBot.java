@@ -50,10 +50,10 @@ public class TodoBot extends TelegramLongPollingBot {
                 sendMessage(chatId, "\uD83D\uDC4B Привет! Я TodoList Helper!\n" +
                         "Доступные команды:\n" +
                         "/start - Начало работы\n" +
-                        "/add - Добавить задачу\n" +
+                        "/add (текст задачи) - Добавить задачу\n" +
                         "/list - Показать все задачи\n" +
-                        "/done - Отметить задачу выполненной\n" +
-                        "/delete - Удалить задачу");
+                        "/done (номер задачи) - Отметить задачу выполненной\n" +
+                        "/delete (номер задачи) - Удалить задачу");
             }
 
             if (messageText.startsWith("/add")){
@@ -69,11 +69,14 @@ public class TodoBot extends TelegramLongPollingBot {
             if (messageText.equals("/list")){
                 var tasks = taskService.getTasksByUser(user.getId());
                 StringBuilder sb = new StringBuilder();
+                int index = 1;
                 if (tasks != null && tasks.isEmpty()){
                     sendMessage(chatId, "Задач нет");
                 } else {
                     for (Task task : tasks){
-                        sb.append(task.getTitle()).append("\n");
+                        String status = task.isCompleted() ? "✅" : "⬜";
+                        sb.append(index).append(". ").append(status).append(" ").append(task.getTitle()).append("\n");
+                        index++;
                     }
                     sendMessage(chatId, sb.toString());
                 }
@@ -81,18 +84,22 @@ public class TodoBot extends TelegramLongPollingBot {
 
             if(messageText.startsWith("/done")){
                 if (messageText.length() > 6){
-                    String number = messageText.substring(6);
-                    Long newNumber = Long.parseLong(number);
-                    taskService.markDone(newNumber);
+                    String numberStr = messageText.substring(6);
+                    int index = Integer.parseInt(numberStr) -1;
+                    var tasks = taskService.getTasksByUser(user.getId());
+                    Task task = tasks.get(index);
+                    taskService.markDone(task.getId());
                     sendMessage(chatId, "Задача выполнена!");
                 }
             }
 
             if (messageText.startsWith("/delete")){
                 if (messageText.length() >8){
-                    String number = messageText.substring(8);
-                    Long newNumber = Long.parseLong(number);
-                    taskService.deleteTask(newNumber);
+                    String numberStr = messageText.substring(8);
+                    int index = Integer.parseInt(numberStr) -1;
+                    var tasks = taskService.getTasksByUser(user.getId());
+                    Task task = tasks.get(index);
+                    taskService.deleteTask(task.getId());
                     sendMessage(chatId, "Задача удалена!");
                 }
             }
