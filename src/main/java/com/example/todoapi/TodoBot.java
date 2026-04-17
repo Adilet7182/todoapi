@@ -61,7 +61,7 @@ public class TodoBot extends TelegramLongPollingBot {
                         "/list - Показать все задачи\n" +
                         "/done (номер задачи) - Отметить задачу выполненной\n" +
                         "/delete (номер задачи) - Удалить задачу\n" +
-                        "/review (текст отзывы) - отправить отзыв разработчику");
+                        "/review (текст отзыва) - отправить отзыв разработчику");
             }
 
             if (messageText.startsWith("/add")){
