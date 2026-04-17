@@ -18,6 +18,9 @@ public class TodoBot extends TelegramLongPollingBot {
     @Value("${bot.username}")
     private String botUsername;
 
+    @Value("${admin.chat.id}")
+    private Long adminChatId;
+
     @Override
     public String getBotToken(){
         return botToken;
@@ -26,6 +29,10 @@ public class TodoBot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername(){
         return botUsername;
+    }
+
+    public Long getAdminChatId() {
+        return adminChatId;
     }
 
     private final UserService userService;
@@ -53,7 +60,8 @@ public class TodoBot extends TelegramLongPollingBot {
                         "/add (текст задачи) - Добавить задачу\n" +
                         "/list - Показать все задачи\n" +
                         "/done (номер задачи) - Отметить задачу выполненной\n" +
-                        "/delete (номер задачи) - Удалить задачу");
+                        "/delete (номер задачи) - Удалить задачу\n" +
+                        "/review (текст отзывы) - отправить отзыв разработчику");
             }
 
             if (messageText.startsWith("/add")){
@@ -62,7 +70,7 @@ public class TodoBot extends TelegramLongPollingBot {
                     taskService.createTask(user.getId(), text);
                     sendMessage(chatId, "Задача Добавлена!");
                 } else {
-                    sendMessage(chatId, "А где сообственно текст?");
+                    sendMessage(chatId, "А где сообственно текст? Напишите текст задачи сразу после команды /add");
                 }
             }
 
@@ -104,6 +112,15 @@ public class TodoBot extends TelegramLongPollingBot {
                 }
             }
 
+            if(messageText.startsWith("/review")){
+                if (messageText.length() > 8) {
+                    String feedback = messageText.substring(8);
+                    sendMessage(adminChatId, "Отзыв от @" + username + ":\n" + feedback);
+                    sendMessage(chatId, "Спасибо за отзыв!");
+                } else {
+                    sendMessage(chatId, "Напишите текст отзыва после команды /review");
+                }
+            }
         }
     }
 
