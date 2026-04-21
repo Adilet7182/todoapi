@@ -7,7 +7,12 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TodoBot extends TelegramLongPollingBot {
@@ -54,14 +59,14 @@ public class TodoBot extends TelegramLongPollingBot {
             User user = userService.getOrCreateUser(telegramId, username);
 
             if (messageText.equals("/start")){
-                sendMessage(chatId, "\uD83D\uDC4B Привет! Я TodoList Helper!\n" +
+                sendMessageWithKeyboard(chatId, "\uD83D\uDC4B Привет! Я TodoList Helper!\n" +
                         "Доступные команды:\n" +
                         "/start - Начало работы\n" +
                         "/add (текст задачи) - Добавить задачу\n" +
                         "/list - Показать все задачи\n" +
                         "/done (номер задачи) - Отметить задачу выполненной\n" +
                         "/delete (номер задачи) - Удалить задачу\n" +
-                        "/review (текст отзыва) - отправить отзыв разработчику");
+                        "/review (текст отзыва) - Отправить отзыв разработчику", getKeyboard());
             }
 
             if (messageText.startsWith("/add")){
@@ -124,6 +129,32 @@ public class TodoBot extends TelegramLongPollingBot {
         }
     }
 
+    private ReplyKeyboardMarkup getKeyboard(){
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        keyboard.setResizeKeyboard(true);
+
+        List<KeyboardRow>  rows = new ArrayList<>();
+
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add("/add");
+        row1.add("/list");
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add("/done");
+        row2.add("/delete");
+
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add("/review");
+
+        rows.add(row1);
+        rows.add(row2);
+        rows.add(row3);
+
+        keyboard.setKeyboard(rows);
+
+        return keyboard;
+    }
+
     private void sendMessage(Long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
@@ -136,4 +167,15 @@ public class TodoBot extends TelegramLongPollingBot {
         }
     }
 
+    private void sendMessageWithKeyboard(Long chatId, String text, ReplyKeyboardMarkup keyboard) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId.toString());
+        message.setText(text);
+        message.setReplyMarkup(keyboard);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 }
